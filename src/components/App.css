@@ -1,0 +1,21 @@
+#searchbox {
+  width: 20rem;
+  margin-right: 1rem;
+}
+
+#version-tag {
+  position: absolute;
+  bottom: 0.25rem;
+  right: 0.5rem;
+}
+
+.mainContainer {
+  max-width: 1440px;
+  height: 100vh;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: left;
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+}
