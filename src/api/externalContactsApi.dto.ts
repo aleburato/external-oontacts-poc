@@ -20,3 +20,10 @@ export type ExternalContactDTO = {
   }[];
   companyName?: string;
 };
+
+export type SearchExternalContactsResultDTO = {
+  result: ExternalContactDTO[];
+  limit: number;
+  start: number;
+  total: number;
+};

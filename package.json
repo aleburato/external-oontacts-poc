@@ -24,6 +24,8 @@
   "devDependencies": {
     "@eslint/js": "^9.11.1",
     "@faker-js/faker": "^9.0.3",
+    "@fetch-mock/vitest": "^0.1.5",
+    "@types/node": "^22.7.9",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.2",
