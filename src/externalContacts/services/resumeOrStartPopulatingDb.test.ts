@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { faker } from "@faker-js/faker";
-import { givenAMockExternalContactsApi } from "../../api/externalContactsApi.mocks";
+import { givenAMockExternalContactsApi } from "../api/externalContactsApi.mocks";
 import { givenADbContact } from "../model/dbContact.mocks";
-import { givenAMockExternalContactsDbRepo } from "../repo/contactsDbRepo.mocks";
+import { givenAMockExternalContactsDbRepo } from "../repo/externalContactsDbRepo.mocks";
 import { resumeOrStartPopulatingDb } from "./resumeOrStartPopulatingDb";
 
 const setupSut = () => {

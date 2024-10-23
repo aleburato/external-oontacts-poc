@@ -2,13 +2,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   mockFetchWithResponse,
   restoreOriginalFetch,
-} from "../_testing/mockFetch";
-import {
-  createExternalContactsApi,
-  ExternalContactsApiImpl,
-} from "./externalContactsApi";
+} from "../../_testing/mockFetch";
+import { createExternalContactsApi } from "./externalContactsApi";
 import { SearchExternalContactsResultDTO } from "./externalContactsApi.dto";
 import { givenAMockSearchExternalContactsResultDTO } from "./externalContactsApi.mocks";
+import { ExternalContactsApiImpl } from "./externalContactsApiImpl";
 
 afterEach(() => {
   restoreOriginalFetch();
@@ -36,6 +34,30 @@ describe("api", () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         "https://webexapis.com/v1/contacts/organizations/myOrgId/contacts/search?start=5555&limit=99",
+        {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer myAuthToken",
+          },
+        }
+      );
+    });
+  });
+
+  describe("getTotalContactsCount", () => {
+    it("calls the proper endpoint with the proper parameters and returns the result", async () => {
+      const dto = givenAMockSearchExternalContactsResultDTO();
+      const mockFetch =
+        mockFetchWithResponse<SearchExternalContactsResultDTO>(dto);
+
+      const api = new ExternalContactsApiImpl("myOrgId", "myAuthToken");
+
+      const result = await api.getTotalContactsCount();
+
+      expect(result).toBe(dto.total);
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://webexapis.com/v1/contacts/organizations/myOrgId/contacts/search?start=0&limit=1",
         {
           method: "GET",
           headers: {

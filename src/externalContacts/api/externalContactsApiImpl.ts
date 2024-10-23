@@ -1,31 +1,16 @@
 import { faker } from "@faker-js/faker";
-import { DbContact } from "../externalContacts/model/dbContact";
+import {
+  ExternalContactsApi,
+  GetExternalContactsParams,
+  GetExternalContactsResult,
+} from "./externalContactsApi";
 import {
   ExternalContactDTO,
   SearchExternalContactsResultDTO,
 } from "./externalContactsApi.dto";
 
-export type GetExternalContactsParams = {
-  start: number;
-  limit: number;
-};
-export type GetExternalContactsResult = {
-  total: number;
-  start: number;
-  limit: number;
-  contacts: DbContact[];
-};
-
-export interface ExternalContactsApi {
-  getTotalContactsCount: () => Promise<number>;
-  getExternalContacts: ({
-    start,
-    limit,
-  }: GetExternalContactsParams) => Promise<GetExternalContactsResult>;
-}
-
 /**
- * FOR UNIT TESTING ONLY, use createExternalContactsApi() instead.
+ * FOR UNIT TESTING ONLY, use `createExternalContactsApi` factory instead.
  */
 export class ExternalContactsApiImpl implements ExternalContactsApi {
   constructor(
@@ -76,16 +61,4 @@ export class ExternalContactsApiImpl implements ExternalContactsApi {
       limit: data.limit,
     };
   };
-}
-
-const AUTH_TOKEN = import.meta.env.VITE_AUTH_TOKEN;
-const ORG_ID = import.meta.env.VITE_ORG_ID;
-
-let _api: ExternalContactsApi | undefined = undefined;
-
-export function createExternalContactsApi(): ExternalContactsApi {
-  if (!_api) {
-    _api = new ExternalContactsApiImpl(ORG_ID, AUTH_TOKEN);
-  }
-  return _api;
 }

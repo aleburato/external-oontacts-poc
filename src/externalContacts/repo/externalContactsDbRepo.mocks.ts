@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { ExternalContactsDbRepo } from "./contactsDbRepo";
+import { ExternalContactsDbRepo } from "./externalContactsDbRepo";
 
 export function givenAMockExternalContactsDbRepo() {
   return {

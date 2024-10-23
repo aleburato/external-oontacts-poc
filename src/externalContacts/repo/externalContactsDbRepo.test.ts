@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { createExternalContactsDbRepo } from "./contactsDbRepo";
+import { createExternalContactsDbRepo } from "./externalContactsDbRepo";
 
 it("creates the repo object only once", () => {
   const repo1 = createExternalContactsDbRepo({} as never);
