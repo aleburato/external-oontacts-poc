@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { vi } from "vitest";
+import { ExternalContactsApi } from "./externalContactsApi";
 import { SearchExternalContactsResultDTO } from "./externalContactsApi.dto";
-import { ExternalContactsApi } from "./externalContactsApi.types";
 
 export function givenAMockExternalContactsApi() {
   return {
