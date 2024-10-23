@@ -1,7 +1,13 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { externalContactsDb } from "../db/externalContactsDb";
+import { ContactsDbMeta, externalContactsDb } from "../db/externalContactsDb";
 
-export function useContactsDbMetadata() {
+export type UseContactsDbMetadataResult = ContactsDbMeta & {
+  contactsCount: number;
+};
+
+export function useContactsDbMetadata():
+  | UseContactsDbMetadataResult
+  | undefined {
   return useLiveQuery(async () => {
     const contactsCount = await externalContactsDb.contacts.count();
     const lastMeta = await externalContactsDb.meta.get("lastMeta");
