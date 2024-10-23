@@ -5,17 +5,19 @@ import {
 import { DbContact } from "../model/dbContact";
 import { ExternalContactsDbRepoImpl } from "./externalContactsDbRepoImpl";
 
+export type ContactsImportStatus = {
+  lastRetrievedApiTotal: number;
+  contactsCount: number;
+  nextOffset: number;
+  insertionErrors: number;
+};
+
 export interface ExternalContactsDbRepo {
   clearDb(): Promise<void>;
   addContacts(contacts: DbContact[]): Promise<void>;
   updateApiTotal(total: number): Promise<void>;
   updateNextOffset(offset: number): Promise<void>;
-  getContactsImportStatus(): Promise<{
-    lastRetrievedApiTotal: number;
-    contactsCount: number;
-    nextOffset: number;
-    insertionErrors: number;
-  }>;
+  getContactsImportStatus(): Promise<ContactsImportStatus>;
 }
 
 let _repo: ExternalContactsDbRepo | undefined = undefined;

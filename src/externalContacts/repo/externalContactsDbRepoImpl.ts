@@ -72,14 +72,19 @@ export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
       nextContactOffset: offset,
     });
   };
+
   private logBulkError = (err: BulkError) => {
-    console.error(err.failures?.length + " insertions failed!");
-    err.failures?.forEach((failure) => {
-      console.error(failure.message);
-    });
-    // If on dexie@>3.1.0-alpha.6:
-    for (const [pos, error] of Object.entries(err.failuresByPos)) {
-      console.error(`Operation ${pos} failed with ${error}`);
+    try {
+      console.error(err.failures?.length + " insertions failed!");
+      err.failures?.forEach((failure) => {
+        console.error(failure.message);
+      });
+      // If on dexie@>3.1.0-alpha.6:
+      for (const [pos, error] of Object.entries(err.failuresByPos)) {
+        console.error(`Operation ${pos} failed with ${error}`);
+      }
+    } catch {
+      // mhe
     }
   };
 }
