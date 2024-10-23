@@ -1,7 +1,7 @@
 import { memo } from "react";
-import { useContactsDbMetadata } from "../externalContacts/useContactsDbMetadata";
-import { useContactsDbQuery } from "../externalContacts/useContactsDbQuery";
+import { useContactsDbMetadata } from "../hooks/useContactsDbMetadata";
 
+import { useContactsDbQuery } from "../hooks/useContactsDbQuery";
 import "./ContactsList.css";
 
 const QUERY_PAGE_SIZE = 1000;

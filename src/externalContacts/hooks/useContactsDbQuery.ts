@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { externalContactsDb } from "./db/externalContactsDb";
-import { DbContact } from "./model/dbContact";
+import { externalContactsDb } from "../db/externalContactsDb";
+import { DbContact } from "../model/dbContact";
 
 export type UseContactsDbQueryParams = {
   search: string;

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { resumeOrStartPopulatingDb } from "./services/resumeOrStartPopulatingDb";
+import { resumeOrStartPopulatingDb } from "../services/resumeOrStartPopulatingDb";
 
 export function useInitializeContactsDb() {
   const contactsFetchStarted = useRef(false);

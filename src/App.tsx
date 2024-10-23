@@ -1,9 +1,9 @@
 import { useDebounce } from "@uidotdev/usehooks";
 import { useState } from "react";
-import { useInitializeContactsDb } from "../externalContacts/useInitializeContactsDb";
-import { ContactsList } from "./ContactsList";
+import { ContactsList } from "./externalContacts/components/ContactsList";
+import { useInitializeContactsDb } from "./externalContacts/hooks/useInitializeContactsDb";
 
-import { version } from "../../package.json";
+import { version } from "../package.json";
 
 import "./App.css";
 

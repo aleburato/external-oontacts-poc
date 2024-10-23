@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { externalContactsDb } from "./db/externalContactsDb";
+import { externalContactsDb } from "../db/externalContactsDb";
 
 export function useContactsDbMetadata() {
   return useLiveQuery(async () => {
