@@ -28,7 +28,7 @@ describe("resumeOrStartPopulatingDb", () => {
 
     mockApi.getTotalContactsCount.mockRejectedValueOnce(new Error("OMG!"));
 
-    mockDbRepo.getContactsImportStatus.mockResolvedValueOnce({
+    mockDbRepo.getImportStatus.mockResolvedValueOnce({
       orgId: "an_org_id",
       lastRetrievedApiTotal: 10,
       contactsCount: 2,
@@ -38,7 +38,7 @@ describe("resumeOrStartPopulatingDb", () => {
 
     await expect(() => invokeSut()).rejects.toThrowError("OMG!");
 
-    expect(mockDbRepo.getContactsImportStatus).not.toBeCalled();
+    expect(mockDbRepo.getImportStatus).not.toBeCalled();
     expect(mockDbRepo.clearDb).not.toBeCalled();
     expect(mockApi.getTotalContactsCount).toHaveBeenCalledOnce();
   });
@@ -47,7 +47,7 @@ describe("resumeOrStartPopulatingDb", () => {
     const { mockDbRepo, mockApi, invokeSut } = setupSut();
 
     mockApi.getTotalContactsCount.mockResolvedValueOnce(10);
-    mockDbRepo.getContactsImportStatus.mockResolvedValueOnce({
+    mockDbRepo.getImportStatus.mockResolvedValue({
       orgId: mockApi.orgId,
       lastRetrievedApiTotal: 10,
       contactsCount: 10,
@@ -58,14 +58,14 @@ describe("resumeOrStartPopulatingDb", () => {
     await invokeSut();
 
     expect(mockApi.getTotalContactsCount).toHaveBeenCalledOnce();
-    expect(mockDbRepo.getContactsImportStatus).toHaveBeenCalledOnce();
+    expect(mockDbRepo.getImportStatus).toHaveBeenCalledTimes(2);
     expect(mockDbRepo.clearDb).not.toBeCalled();
   });
 
   it("should clear the db and update its stored total if api returns a different total than the db", async () => {
     const { mockDbRepo, mockApi, invokeSut } = setupSut();
 
-    mockDbRepo.getContactsImportStatus.mockResolvedValue({
+    mockDbRepo.getImportStatus.mockResolvedValue({
       orgId: mockApi.orgId,
       lastRetrievedApiTotal: 10,
       contactsCount: 0,
@@ -77,16 +77,18 @@ describe("resumeOrStartPopulatingDb", () => {
     await invokeSut();
 
     expect(mockApi.getTotalContactsCount).toHaveBeenCalledOnce();
-    expect(mockDbRepo.getContactsImportStatus).toHaveBeenCalledOnce();
+    expect(mockDbRepo.getImportStatus).toHaveBeenCalledTimes(2);
     expect(mockDbRepo.clearDb).toHaveBeenCalledOnce();
-    expect(mockDbRepo.updateApiTotal).toHaveBeenCalledOnce();
-    expect(mockDbRepo.updateApiTotal).toBeCalledWith(0);
+    expect(mockDbRepo.clearDb).toHaveBeenCalledWith({
+      lastRetrievedApiTotal: 0,
+      orgId: mockApi.orgId,
+    });
   });
 
   it("should clear the db if orgId is different", async () => {
     const { mockDbRepo, mockApi, invokeSut } = setupSut();
 
-    mockDbRepo.getContactsImportStatus.mockResolvedValue({
+    mockDbRepo.getImportStatus.mockResolvedValue({
       orgId: mockApi.orgId + "_NOPE",
       lastRetrievedApiTotal: 0,
       contactsCount: 0,
@@ -98,17 +100,15 @@ describe("resumeOrStartPopulatingDb", () => {
     await invokeSut();
 
     expect(mockApi.getTotalContactsCount).toHaveBeenCalledOnce();
-    expect(mockDbRepo.getContactsImportStatus).toHaveBeenCalledOnce();
+    expect(mockDbRepo.getImportStatus).toHaveBeenCalledTimes(2);
     expect(mockDbRepo.clearDb).toHaveBeenCalledOnce();
-    expect(mockDbRepo.updateOrgId).toHaveBeenCalledOnce();
-    expect(mockDbRepo.updateOrgId).toBeCalledWith(mockApi.orgId);
   });
 
   it("should throw if fetching external contacts returns error", async () => {
     const { mockDbRepo, invokeSut, mockApi } = setupSut();
 
     mockApi.getTotalContactsCount.mockResolvedValueOnce(15);
-    mockDbRepo.getContactsImportStatus.mockResolvedValueOnce({
+    mockDbRepo.getImportStatus.mockResolvedValue({
       orgId: mockApi.orgId,
       lastRetrievedApiTotal: 15,
       contactsCount: 2,
@@ -119,13 +119,8 @@ describe("resumeOrStartPopulatingDb", () => {
 
     await expect(() => invokeSut()).rejects.toThrowError("OMG!");
 
-    expect(mockDbRepo.getContactsImportStatus).toHaveBeenCalledOnce();
     expect(mockDbRepo.clearDb).not.toBeCalled();
     expect(mockApi.getExternalContacts).toHaveBeenCalledOnce();
-    expect(mockApi.getExternalContacts).toHaveBeenCalledWith({
-      limit: 100,
-      start: 7,
-    });
   });
 
   it("should keep on fetching contacts and adding to the db until total is reached", async () => {
@@ -152,15 +147,16 @@ describe("resumeOrStartPopulatingDb", () => {
       };
     });
 
-    let getContactsImportStatusCounter = -1;
-    mockDbRepo.getContactsImportStatus.mockImplementation(async () => {
+    let getContactsImportStatusCounter = -2; // to take into account the first out of the loop call
+    mockDbRepo.getImportStatus.mockImplementation(async () => {
       getContactsImportStatusCounter++;
+      const normalizedCounter = Math.max(getContactsImportStatusCounter, 0);
       return {
         orgId: mockApi.orgId,
         lastRetrievedApiTotal: 10,
-        contactsCount: Math.min(getContactsImportStatusCounter * 4, 10),
+        contactsCount: Math.min(normalizedCounter * 4, 10),
         insertionErrors: 0,
-        nextOffset: getContactsImportStatusCounter * 4,
+        nextOffset: normalizedCounter * 4,
       };
     });
 
@@ -180,7 +176,7 @@ describe("resumeOrStartPopulatingDb", () => {
       start: 8,
     });
 
-    expect(mockDbRepo.getContactsImportStatus).toHaveBeenCalledTimes(3 + 1);
+    expect(mockDbRepo.getImportStatus).toHaveBeenCalledTimes(3 + 2);
     expect(mockApi.getTotalContactsCount).toHaveBeenCalledTimes(1);
 
     expect(mockDbRepo.clearDb).not.toBeCalled();

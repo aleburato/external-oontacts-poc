@@ -12,50 +12,40 @@ export async function resumeOrStartPopulatingDb(
   }
 ): Promise<void> {
   console.log(">>> resumeOrStartPopulatingDb: BEGIN");
+
+  const apiTotal = await _contactsApi.getTotalContactsCount();
+  const currentOrgId = _contactsApi.orgId;
+
+  const { lastRetrievedApiTotal, orgId } = await _dbRepo.getImportStatus();
+
+  if (lastRetrievedApiTotal !== apiTotal || orgId !== currentOrgId) {
+    console.log(
+      `>>> resumeOrStartPopulatingDb: clearing DB for API/DB mismatch`,
+      { lastRetrievedApiTotal, apiTotal, orgId, currentOrgId }
+    );
+
+    // need to clear db
+    await _dbRepo.clearDb({
+      lastRetrievedApiTotal: apiTotal,
+      orgId: currentOrgId,
+    });
+  }
+
   let numOfCalls = 0;
 
-  let apiTotal = await _contactsApi.getTotalContactsCount();
-
   while (true) {
-    if (numOfCalls++ > MAX_NUM_CALLS) {
+    if (++numOfCalls > MAX_NUM_CALLS) {
       throw new Error("Max number of calls exceeded");
     }
-    let {
-      lastRetrievedApiTotal,
-      contactsCount,
-      insertionErrors,
-      nextOffset,
-      // eslint-disable-next-line prefer-const
-      orgId,
-    } = await _dbRepo.getContactsImportStatus();
-
-    const currentOrgId = _contactsApi.orgId;
+    const { contactsCount, insertionErrors, nextOffset } =
+      await _dbRepo.getImportStatus();
 
     console.log(`>>> resumeOrStartPopulatingDb (${numOfCalls}): `, {
-      lastRetrievedApiTotal,
       apiTotal,
       contactsCount,
       insertionErrors,
       nextOffset,
-      orgId,
     });
-
-    if (lastRetrievedApiTotal !== apiTotal || orgId !== currentOrgId) {
-      // need to clear db
-      await _dbRepo.clearDb();
-      await _dbRepo.updateNextOffset(0);
-      await _dbRepo.updateApiTotal(apiTotal);
-      await _dbRepo.updateOrgId(currentOrgId);
-
-      lastRetrievedApiTotal = apiTotal;
-      insertionErrors = 0;
-      contactsCount = 0;
-      nextOffset = 0;
-      console.log(
-        `>>> resumeOrStartPopulatingDb (${numOfCalls}): clearing DB for API/DB mismatch`,
-        { lastRetrievedApiTotal, apiTotal, orgId, currentOrgId }
-      );
-    }
 
     if (nextOffset >= apiTotal) {
       console.log(
@@ -69,8 +59,6 @@ export async function resumeOrStartPopulatingDb(
       limit: _pageSize,
       start: nextOffset,
     });
-
-    apiTotal = res.total;
 
     console.log(
       `>>> resumeOrStartPopulatingDb (${numOfCalls}), called getExternalContacts: `,

@@ -29,7 +29,7 @@ export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
       "lastMeta"
     );
   };
-  getContactsImportStatus = async () =>
+  getImportStatus = async () =>
     await this.db.transaction(
       "r",
       [this.db.contacts, this.db.meta],
@@ -68,7 +68,6 @@ export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
         }
       }
     );
-    console.log(">>> addContacts: transaction complete");
   };
   queryContacts = async ({
     search,
@@ -119,21 +118,9 @@ export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
     };
   };
 
-  updateApiTotal = async (lastRetrievedApiTotal: number) => {
-    await this.db.meta.update("lastMeta", {
-      lastRetrievedApiTotal,
-    });
-  };
-
   updateNextOffset = async (offset: number) => {
     await this.db.meta.update("lastMeta", {
       nextContactOffset: offset,
-    });
-  };
-
-  updateOrgId = async (orgId: string) => {
-    await this.db.meta.update("lastMeta", {
-      orgId,
     });
   };
 

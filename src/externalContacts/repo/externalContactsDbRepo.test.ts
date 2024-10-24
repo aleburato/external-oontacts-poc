@@ -45,18 +45,6 @@ describe("implementation", () => {
     );
   });
 
-  it("updateApiTotal updates the metadata", async () => {
-    const mockDb = givenAnExternalContactDb();
-    const repo = new ExternalContactsDbRepoImpl(mockDb as any);
-
-    const testValue = faker.number.int();
-    await repo.updateApiTotal(testValue);
-    expect(mockDb.meta.update).toHaveBeenCalledOnce();
-    expect(mockDb.meta.update).toHaveBeenCalledWith("lastMeta", {
-      lastRetrievedApiTotal: testValue,
-    });
-  });
-
   it("updateNextOffset updates the metadata", async () => {
     const mockDb = givenAnExternalContactDb();
     const repo = new ExternalContactsDbRepoImpl(mockDb as any);
@@ -69,7 +57,7 @@ describe("implementation", () => {
     });
   });
 
-  it("getContactsImportStatus initiates a transaction with the proper parameters", async () => {
+  it("getImportStatus initiates a transaction with the proper parameters", async () => {
     const mockDb = givenAnExternalContactDb();
     const repo = new ExternalContactsDbRepoImpl(mockDb as any);
     mockDb.contacts.count.mockReturnValueOnce(84);
@@ -81,7 +69,7 @@ describe("implementation", () => {
       timestamp: new Date().toISOString(),
     });
 
-    const result = await repo.getContactsImportStatus();
+    const result = await repo.getImportStatus();
     expect(mockDb.transaction).toHaveBeenCalledOnce();
     expect(mockDb.transaction).toHaveBeenCalledWith(
       "r",
