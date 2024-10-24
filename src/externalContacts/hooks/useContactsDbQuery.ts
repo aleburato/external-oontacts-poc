@@ -1,4 +1,4 @@
-import { PromiseExtended, Table } from "dexie";
+import { PromiseExtended } from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
 import { externalContactsDb } from "../db/externalContactsDb";
 import { DbContact } from "../model/dbContact";
@@ -24,7 +24,20 @@ export function useContactsDbQuery({
   return useLiveQuery(async () => {
     const table = externalContactsDb.contacts;
 
-    const query = buildSearchQuery(search, table);
+    const query = cleanSearch
+      ? table
+          .where("displayName")
+          .startsWithIgnoreCase(cleanSearch)
+          .or("companyName")
+          .startsWithIgnoreCase(cleanSearch)
+          .or("givenName")
+          .startsWithIgnoreCase(cleanSearch)
+          .or("familyName")
+          .startsWithIgnoreCase(cleanSearch)
+          .or("phoneNumbers")
+          .startsWithIgnoreCase(cleanSearch)
+          .distinct()
+      : table.toCollection();
 
     // Record all primary keys of the entire result into a Set (hashmap)
     const ids = new Set(await query.primaryKeys());
@@ -45,33 +58,9 @@ export function useContactsDbQuery({
         }
       });
 
-    // YES, you have to build the query twice
-    // or after the count query there won't be no results.
-    // NO, Collection.clone() won't work.
-    const countQuery = buildSearchQuery(search, table);
-
-    const [totalContacts, contacts] = await Promise.all([
-      countQuery.count(),
-      await Promise.all(contactPromises),
-    ]);
-
-    return { contacts, totalContacts };
+    return {
+      contacts: await Promise.all(contactPromises),
+      totalContacts: ids.size,
+    };
   }, [cleanSearch, start, limit]);
-}
-
-function buildSearchQuery(search: string, table: Table) {
-  return search
-    ? table
-        .where("displayName")
-        .startsWithIgnoreCase(search)
-        .or("companyName")
-        .startsWithIgnoreCase(search)
-        .or("givenName")
-        .startsWithIgnoreCase(search)
-        .or("familyName")
-        .startsWithIgnoreCase(search)
-        .or("phoneNumbers")
-        .startsWithIgnoreCase(search)
-        .distinct()
-    : table.toCollection();
 }

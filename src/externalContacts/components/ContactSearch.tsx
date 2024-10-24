@@ -6,10 +6,11 @@ import "./ContactSearch.css";
 export interface ContactSearchProps {
   onSearchChange: (searchTerm: string) => void;
   onPageChange: (page: number) => void;
+  maxPage: number;
 }
 
 export const ContactSearch = memo(
-  ({ onSearchChange, onPageChange }: ContactSearchProps) => {
+  ({ onSearchChange, onPageChange, maxPage }: ContactSearchProps) => {
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const debouncedSearchTerm = useDebounce(search, 300).trim();
@@ -54,7 +55,7 @@ export const ContactSearch = memo(
           value={page}
           type="number"
           min="1"
-          max="100"
+          max={maxPage}
         />
       </div>
     );
