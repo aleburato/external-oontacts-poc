@@ -1,3 +1,4 @@
+import { PromiseExtended, Table } from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
 import { externalContactsDb } from "../db/externalContactsDb";
 import { DbContact } from "../model/dbContact";
@@ -21,32 +22,46 @@ export function useContactsDbQuery({
   const cleanSearch = search.trim().toLowerCase();
 
   return useLiveQuery(async () => {
+    const table = externalContactsDb.contacts;
+
+    const query = buildSearchQuery(search, table);
+
+    // Record all primary keys of the entire result into a Set (hashmap)
+    const ids = new Set(await query.primaryKeys());
+
+    const contactPromises: PromiseExtended<DbContact>[] = []; // to collect ids sorted by index;
+    let skipped = 0; // to account for the offset
+    // Use a sort index to query data:
+    await table
+      .orderBy("givenName")
+      .until(() => contactPromises.length >= limit)
+      .eachPrimaryKey((id) => {
+        if (ids.has(id)) {
+          if (skipped >= start) {
+            contactPromises.push(table.get(id) as PromiseExtended<DbContact>);
+          } else {
+            skipped++;
+          }
+        }
+      });
+
     // YES, you have to build the query twice
     // or after the count query there won't be no results.
     // NO, Collection.clone() won't work.
-    const query = buildSearchQuery(search);
-    const countQuery = buildSearchQuery(search);
+    const countQuery = buildSearchQuery(search, table);
 
     const [totalContacts, contacts] = await Promise.all([
       countQuery.count(),
-      query.offset(start).limit(limit).toArray(),
+      await Promise.all(contactPromises),
     ]);
-
-    // console.log(">>> liveQuery", {
-    //   search,
-    //   start,
-    //   limit,
-    //   totalContacts,
-    //   resNum: contacts.length,
-    // });
 
     return { contacts, totalContacts };
   }, [cleanSearch, start, limit]);
 }
 
-function buildSearchQuery(search: string) {
+function buildSearchQuery(search: string, table: Table) {
   return search
-    ? externalContactsDb.contacts
+    ? table
         .where("displayName")
         .startsWithIgnoreCase(search)
         .or("companyName")
@@ -58,5 +73,5 @@ function buildSearchQuery(search: string) {
         .or("phoneNumbers")
         .startsWithIgnoreCase(search)
         .distinct()
-    : externalContactsDb.contacts.toCollection();
+    : table.toCollection();
 }
