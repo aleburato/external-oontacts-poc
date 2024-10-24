@@ -1,14 +1,14 @@
 import { memo, useContext, useEffect } from "react";
 import { UseContactsDbMetadataResult } from "../hooks/useContactsDbMetadata";
-import { UseContactsDbQueryResult } from "../hooks/useContactsDbQuery";
 import { QUERY_PAGE_SIZE } from "./ContactList";
 
+import { QueryContactsResult } from "../repo/externalContactsDbRepo";
 import "./ContactListHeader.css";
-import { ContactsContext } from "./contexts/ContactsContext";
+import { ContactsContext } from "./contexts/contactsContext";
 
 export interface ContactListHeaderProps {
   dbMeta: UseContactsDbMetadataResult;
-  queryResults: UseContactsDbQueryResult;
+  queryResults: QueryContactsResult;
   searchTerm: string;
   page: number;
 }

@@ -1,7 +1,11 @@
-import { BulkError } from "dexie";
+import { BulkError, PromiseExtended } from "dexie";
 import { DexieExternalContactsDb } from "../db/externalContactsDb";
 import { DbContact } from "../model/dbContact";
-import { ExternalContactsDbRepo } from "./externalContactsDbRepo";
+import {
+  ExternalContactsDbRepo,
+  QueryContactsParams,
+  QueryContactsResult,
+} from "./externalContactsDbRepo";
 
 /**
  * For UNIT TESTING use only, use the `createExternalContactsDbRepo` factory instead.
@@ -61,6 +65,52 @@ export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
       }
     );
     console.log(">>> addContacts: transaction complete");
+  };
+  queryContacts = async ({
+    search,
+    limit,
+    start,
+  }: QueryContactsParams): Promise<QueryContactsResult> => {
+    const table = this.db.contacts;
+
+    const query = search
+      ? table
+          .where("displayName")
+          .startsWithIgnoreCase(search)
+          .or("companyName")
+          .startsWithIgnoreCase(search)
+          .or("givenName")
+          .startsWithIgnoreCase(search)
+          .or("familyName")
+          .startsWithIgnoreCase(search)
+          .or("phoneNumbers")
+          .startsWithIgnoreCase(search)
+          .distinct()
+      : table.toCollection();
+
+    // Record all primary keys of the entire result into a Set (hashmap)
+    const queryIds = new Set(await query.primaryKeys());
+
+    const contactPromises: PromiseExtended<DbContact>[] = []; // to collect ids sorted by index;
+    let skipped = 0; // to account for the offset
+    // Use a sort index to query data:
+    await table
+      .orderBy("givenName")
+      .until(() => contactPromises.length >= limit)
+      .eachPrimaryKey((id) => {
+        if (queryIds.has(id)) {
+          if (skipped >= start) {
+            contactPromises.push(table.get(id) as PromiseExtended<DbContact>);
+          } else {
+            skipped++;
+          }
+        }
+      });
+
+    return {
+      contacts: await Promise.all(contactPromises),
+      totalContacts: queryIds.size,
+    };
   };
   updateApiTotal = async (lastRetrievedApiTotal: number) => {
     await this.db.meta.update("lastMeta", {

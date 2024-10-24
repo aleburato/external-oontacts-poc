@@ -12,8 +12,20 @@ export type ContactsImportStatus = {
   insertionErrors: number;
 };
 
+export type QueryContactsParams = {
+  search: string;
+  start: number;
+  limit: number;
+};
+
+export type QueryContactsResult = {
+  contacts: DbContact[];
+  totalContacts: number;
+};
+
 export interface ExternalContactsDbRepo {
   clearDb(): Promise<void>;
+  queryContacts(params: QueryContactsParams): Promise<QueryContactsResult>;
   addContacts(contacts: DbContact[]): Promise<void>;
   updateApiTotal(total: number): Promise<void>;
   updateNextOffset(offset: number): Promise<void>;

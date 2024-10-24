@@ -11,6 +11,9 @@ export function givenAMockExternalContactsDbRepo() {
     addContacts: vi
       .fn<ExternalContactsDbRepo["addContacts"]>()
       .mockName("addContacts"),
+    queryContacts: vi
+      .fn<ExternalContactsDbRepo["queryContacts"]>()
+      .mockName("queryContacts"),
     updateApiTotal: vi
       .fn<ExternalContactsDbRepo["updateApiTotal"]>()
       .mockName("updateTotal"),

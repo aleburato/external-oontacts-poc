@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useInitializeContactsDb } from "../hooks/useInitializeContactsDb";
 import { ContactList } from "./ContactList";
 import { ContactSearch } from "./ContactSearch";
-import { ContactsContext } from "./contexts/ContactsContext";
+import { ContactsContext } from "./contexts/contactsContext";
 
 export function Contacts() {
   useInitializeContactsDb();
