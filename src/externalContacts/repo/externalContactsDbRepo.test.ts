@@ -8,6 +8,7 @@ import {
 import {
   ContactsImportStatus,
   createExternalContactsDbRepo,
+  ExternalContactsDbRepo,
 } from "./externalContactsDbRepo";
 import { ExternalContactsDbRepoImpl } from "./externalContactsDbRepoImpl";
 
@@ -28,15 +29,17 @@ describe("implementation", () => {
   it("clearDb clears the `contacts` table and resets the metadata", async () => {
     vitest.useFakeTimers();
     const mockDb = givenAnExternalContactDb();
-    const repo = new ExternalContactsDbRepoImpl(mockDb as any);
+    const repo: ExternalContactsDbRepo = new ExternalContactsDbRepoImpl(
+      mockDb as any
+    );
 
-    await repo.clearDb();
+    await repo.clearDb({ lastRetrievedApiTotal: 111, orgId: "myOrgId" });
     expect(mockDb.contacts.clear).toHaveBeenCalledOnce();
     expect(mockDb.meta.put).toHaveBeenCalledOnce();
     expect(mockDb.meta.put).toHaveBeenCalledWith(
       {
-        orgId: "",
-        lastRetrievedApiTotal: -1,
+        orgId: "myOrgId",
+        lastRetrievedApiTotal: 111,
         nextContactOffset: 0,
         failedContactInsertionAttempts: 0,
         timestamp: new Date().toISOString(),

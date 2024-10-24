@@ -2,6 +2,7 @@ import { BulkError, PromiseExtended } from "dexie";
 import {
   ExternalContactsDb,
   ExternalContactsDbContact,
+  ExternalContactsDbMeta,
 } from "../db/externalContactsDb.types";
 import {
   ExternalContactsDbRepo,
@@ -16,12 +17,15 @@ import {
 export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
   constructor(private db: ExternalContactsDb) {}
 
-  clearDb = async () => {
+  clearDb = async ({
+    lastRetrievedApiTotal,
+    orgId,
+  }: Pick<ExternalContactsDbMeta, "lastRetrievedApiTotal" | "orgId">) => {
     await this.db.contacts.clear();
     await this.db.meta.put(
       {
-        orgId: "",
-        lastRetrievedApiTotal: -1,
+        orgId,
+        lastRetrievedApiTotal,
         nextContactOffset: 0,
         failedContactInsertionAttempts: 0,
         timestamp: new Date().toISOString(),
