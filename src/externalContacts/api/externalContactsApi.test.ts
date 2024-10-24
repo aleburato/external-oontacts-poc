@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   mockFetchWithResponse,
@@ -65,6 +66,16 @@ describe("api", () => {
           },
         }
       );
+    });
+  });
+
+  describe("orgId", () => {
+    it("is exposed correctly", async () => {
+      const testOrgId = faker.string.uuid();
+
+      const api = new ExternalContactsApiImpl(testOrgId, "myAuthToken");
+
+      expect(api.orgId).toBe(testOrgId);
     });
   });
 });
