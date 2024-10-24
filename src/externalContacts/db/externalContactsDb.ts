@@ -1,22 +1,10 @@
 // db.ts
-import Dexie, { type Table } from "dexie";
-import { DbContact } from "../model/dbContact";
-
-export type ContactsDbMeta = {
-  lastRetrievedApiTotal: number;
-  failedContactInsertionAttempts: number;
-  nextContactOffset: number;
-  timestamp: string;
-};
-
-export type DexieExternalContactsDb = Dexie & {
-  contacts: Table<DbContact, "id">;
-  meta: Table<ContactsDbMeta, "lastMeta">;
-};
+import Dexie from "dexie";
+import { ExternalContactsDb } from "./externalContactsDb.types";
 
 export const externalContactsDb = new Dexie(
   "ExternalContactsDatabase"
-) as DexieExternalContactsDb;
+) as ExternalContactsDb;
 
 // Schema declaration:
 externalContactsDb.version(1).stores({

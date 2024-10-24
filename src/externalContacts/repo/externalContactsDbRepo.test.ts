@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { faker } from "@faker-js/faker";
 import { afterEach, describe, expect, it, vitest } from "vitest";
-import { givenAnExternalContactDb } from "../db/externalContactsDb.mock";
-import { givenADbContact } from "../model/dbContact.mocks";
+import {
+  givenADbContact,
+  givenAnExternalContactDb,
+} from "../db/externalContactsDb.mocks";
 import {
   ContactsImportStatus,
   createExternalContactsDbRepo,
@@ -33,6 +35,7 @@ describe("implementation", () => {
     expect(mockDb.meta.put).toHaveBeenCalledOnce();
     expect(mockDb.meta.put).toHaveBeenCalledWith(
       {
+        orgId: "",
         lastRetrievedApiTotal: -1,
         nextContactOffset: 0,
         failedContactInsertionAttempts: 0,
@@ -71,6 +74,7 @@ describe("implementation", () => {
     const repo = new ExternalContactsDbRepoImpl(mockDb as any);
     mockDb.contacts.count.mockReturnValueOnce(84);
     mockDb.meta.get.mockResolvedValueOnce({
+      orgId: "foffo",
       lastRetrievedApiTotal: 199,
       nextContactOffset: 88,
       failedContactInsertionAttempts: 4,
@@ -87,6 +91,7 @@ describe("implementation", () => {
     expect(mockDb.meta.get).toHaveBeenCalledOnce();
     expect(mockDb.meta.get).toHaveBeenCalledWith("lastMeta");
     expect(result).toEqual<ContactsImportStatus>({
+      orgId: "foffo",
       contactsCount: 84,
       insertionErrors: 4,
       lastRetrievedApiTotal: 199,

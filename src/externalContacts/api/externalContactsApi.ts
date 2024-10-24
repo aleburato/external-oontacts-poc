@@ -1,4 +1,4 @@
-import { DbContact } from "../model/dbContact";
+import { ExternalContactsDbContact } from "../db/externalContactsDb.types";
 import { ExternalContactsApiImpl } from "./externalContactsApiImpl";
 
 export interface GetExternalContactsParams {
@@ -9,12 +9,13 @@ export interface GetExternalContactsResult {
   total: number;
   start: number;
   limit: number;
-  contacts: DbContact[];
+  contacts: ExternalContactsDbContact[];
 }
 
 export interface ExternalContactsApi {
-  getTotalContactsCount: () => Promise<number>;
-  getExternalContacts: ({
+  readonly orgId: string;
+  readonly getTotalContactsCount: () => Promise<number>;
+  readonly getExternalContacts: ({
     start,
     limit,
   }: GetExternalContactsParams) => Promise<GetExternalContactsResult>;

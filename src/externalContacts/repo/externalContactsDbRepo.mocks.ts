@@ -20,5 +20,8 @@ export function givenAMockExternalContactsDbRepo() {
     updateNextOffset: vi
       .fn<ExternalContactsDbRepo["updateNextOffset"]>()
       .mockName("updateNextOffset"),
+    updateOrgId: vi
+      .fn<ExternalContactsDbRepo["updateOrgId"]>()
+      .mockName("updateOrgId"),
   } satisfies ExternalContactsDbRepo;
 }

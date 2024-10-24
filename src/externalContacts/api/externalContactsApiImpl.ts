@@ -14,7 +14,7 @@ import {
  */
 export class ExternalContactsApiImpl implements ExternalContactsApi {
   constructor(
-    private readonly _orgId: string,
+    public readonly orgId: string,
     private readonly _authToken: string
   ) {}
 
@@ -30,7 +30,7 @@ export class ExternalContactsApiImpl implements ExternalContactsApi {
       limit: `${limit}`,
     });
     const response = await fetch(
-      `https://webexapis.com/v1/contacts/organizations/${this._orgId}/contacts/search?${params}`,
+      `https://webexapis.com/v1/contacts/organizations/${this.orgId}/contacts/search?${params}`,
       {
         method: "GET",
         headers: {

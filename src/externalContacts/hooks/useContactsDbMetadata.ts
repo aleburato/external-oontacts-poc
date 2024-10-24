@@ -1,7 +1,8 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { ContactsDbMeta, externalContactsDb } from "../db/externalContactsDb";
+import { externalContactsDb } from "../db/externalContactsDb";
+import { ExternalContactsDbMeta } from "../db/externalContactsDb.types";
 
-export type UseContactsDbMetadataResult = ContactsDbMeta & {
+export type UseContactsDbMetadataResult = ExternalContactsDbMeta & {
   contactsCount: number;
 };
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { faker } from "@faker-js/faker";
 import { givenAMockExternalContactsApi } from "../api/externalContactsApi.mocks";
-import { givenADbContact } from "../model/dbContact.mocks";
+import { givenADbContact } from "../db/externalContactsDb.mocks";
 import { givenAMockExternalContactsDbRepo } from "../repo/externalContactsDbRepo.mocks";
 import { resumeOrStartPopulatingDb } from "./resumeOrStartPopulatingDb";
 
@@ -29,6 +29,7 @@ describe("resumeOrStartPopulatingDb", () => {
     mockApi.getTotalContactsCount.mockRejectedValueOnce(new Error("OMG!"));
 
     mockDbRepo.getContactsImportStatus.mockResolvedValueOnce({
+      orgId: "an_org_id",
       lastRetrievedApiTotal: 10,
       contactsCount: 2,
       insertionErrors: 0,
@@ -47,6 +48,7 @@ describe("resumeOrStartPopulatingDb", () => {
 
     mockApi.getTotalContactsCount.mockResolvedValueOnce(10);
     mockDbRepo.getContactsImportStatus.mockResolvedValueOnce({
+      orgId: mockApi.orgId,
       lastRetrievedApiTotal: 10,
       contactsCount: 10,
       insertionErrors: 0,
@@ -64,6 +66,7 @@ describe("resumeOrStartPopulatingDb", () => {
     const { mockDbRepo, mockApi, invokeSut } = setupSut();
 
     mockDbRepo.getContactsImportStatus.mockResolvedValue({
+      orgId: mockApi.orgId,
       lastRetrievedApiTotal: 10,
       contactsCount: 0,
       insertionErrors: 0,
@@ -80,11 +83,33 @@ describe("resumeOrStartPopulatingDb", () => {
     expect(mockDbRepo.updateApiTotal).toBeCalledWith(0);
   });
 
+  it("should clear the db if orgId is different", async () => {
+    const { mockDbRepo, mockApi, invokeSut } = setupSut();
+
+    mockDbRepo.getContactsImportStatus.mockResolvedValue({
+      orgId: mockApi.orgId + "_NOPE",
+      lastRetrievedApiTotal: 0,
+      contactsCount: 0,
+      insertionErrors: 0,
+      nextOffset: 0,
+    });
+    mockApi.getTotalContactsCount.mockResolvedValueOnce(0);
+
+    await invokeSut();
+
+    expect(mockApi.getTotalContactsCount).toHaveBeenCalledOnce();
+    expect(mockDbRepo.getContactsImportStatus).toHaveBeenCalledOnce();
+    expect(mockDbRepo.clearDb).toHaveBeenCalledOnce();
+    expect(mockDbRepo.updateOrgId).toHaveBeenCalledOnce();
+    expect(mockDbRepo.updateOrgId).toBeCalledWith(mockApi.orgId);
+  });
+
   it("should throw if fetching external contacts returns error", async () => {
     const { mockDbRepo, invokeSut, mockApi } = setupSut();
 
     mockApi.getTotalContactsCount.mockResolvedValueOnce(15);
     mockDbRepo.getContactsImportStatus.mockResolvedValueOnce({
+      orgId: mockApi.orgId,
       lastRetrievedApiTotal: 15,
       contactsCount: 2,
       insertionErrors: 0,
@@ -131,6 +156,7 @@ describe("resumeOrStartPopulatingDb", () => {
     mockDbRepo.getContactsImportStatus.mockImplementation(async () => {
       getContactsImportStatusCounter++;
       return {
+        orgId: mockApi.orgId,
         lastRetrievedApiTotal: 10,
         contactsCount: Math.min(getContactsImportStatusCounter * 4, 10),
         insertionErrors: 0,

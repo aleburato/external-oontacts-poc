@@ -3,8 +3,9 @@ import { vi } from "vitest";
 import { ExternalContactsApi } from "./externalContactsApi";
 import { SearchExternalContactsResultDTO } from "./externalContactsApi.dto";
 
-export function givenAMockExternalContactsApi() {
+export function givenAMockExternalContactsApi(orgId = faker.string.uuid()) {
   return {
+    orgId,
     getTotalContactsCount: vi
       .fn<ExternalContactsApi["getTotalContactsCount"]>()
       .mockName("getTotalContactsCount")

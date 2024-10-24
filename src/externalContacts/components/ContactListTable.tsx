@@ -1,10 +1,10 @@
 import { memo } from "react";
-import { DbContact } from "../model/dbContact";
+import { ExternalContactsDbContact } from "../db/externalContactsDb.types";
 
 import "./ContactListTable.css";
 
 export interface ContactListTableProps {
-  contacts: DbContact[];
+  contacts: ExternalContactsDbContact[];
   startOffset: number;
 }
 

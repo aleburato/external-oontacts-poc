@@ -1,6 +1,8 @@
 import { BulkError, PromiseExtended } from "dexie";
-import { DexieExternalContactsDb } from "../db/externalContactsDb";
-import { DbContact } from "../model/dbContact";
+import {
+  ExternalContactsDb,
+  ExternalContactsDbContact,
+} from "../db/externalContactsDb.types";
 import {
   ExternalContactsDbRepo,
   QueryContactsParams,
@@ -12,12 +14,13 @@ import {
  */
 
 export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
-  constructor(private db: DexieExternalContactsDb) {}
+  constructor(private db: ExternalContactsDb) {}
 
   clearDb = async () => {
     await this.db.contacts.clear();
     await this.db.meta.put(
       {
+        orgId: "",
         lastRetrievedApiTotal: -1,
         nextContactOffset: 0,
         failedContactInsertionAttempts: 0,
@@ -34,6 +37,7 @@ export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
         const dbMeta = await this.db.meta.get("lastMeta");
 
         return {
+          orgId: dbMeta?.orgId || "",
           lastRetrievedApiTotal: dbMeta?.lastRetrievedApiTotal ?? -1,
           contactsCount: await this.db.contacts.count(),
           nextOffset: dbMeta?.nextContactOffset ?? 0,
@@ -41,7 +45,7 @@ export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
         };
       }
     );
-  addContacts = async (contacts: DbContact[]) => {
+  addContacts = async (contacts: ExternalContactsDbContact[]) => {
     await this.db.transaction(
       "rw",
       [this.db.contacts, this.db.meta],
@@ -91,7 +95,7 @@ export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
     // Record all primary keys of the entire result into a Set (hashmap)
     const queryIds = new Set(await query.primaryKeys());
 
-    const contactPromises: PromiseExtended<DbContact>[] = []; // to collect ids sorted by index;
+    const contactPromises: PromiseExtended<ExternalContactsDbContact>[] = []; // to collect ids sorted by index;
     let skipped = 0; // to account for the offset
     // Use a sort index to query data:
     await table
@@ -100,7 +104,9 @@ export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
       .eachPrimaryKey((id) => {
         if (queryIds.has(id)) {
           if (skipped >= start) {
-            contactPromises.push(table.get(id) as PromiseExtended<DbContact>);
+            contactPromises.push(
+              table.get(id) as PromiseExtended<ExternalContactsDbContact>
+            );
           } else {
             skipped++;
           }
@@ -112,14 +118,22 @@ export class ExternalContactsDbRepoImpl implements ExternalContactsDbRepo {
       totalContacts: queryIds.size,
     };
   };
+
   updateApiTotal = async (lastRetrievedApiTotal: number) => {
     await this.db.meta.update("lastMeta", {
       lastRetrievedApiTotal,
     });
   };
+
   updateNextOffset = async (offset: number) => {
     await this.db.meta.update("lastMeta", {
       nextContactOffset: offset,
+    });
+  };
+
+  updateOrgId = async (orgId: string) => {
+    await this.db.meta.update("lastMeta", {
+      orgId,
     });
   };
 

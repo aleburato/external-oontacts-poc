@@ -20,8 +20,16 @@ export async function resumeOrStartPopulatingDb(
     if (numOfCalls++ > MAX_NUM_CALLS) {
       throw new Error("Max number of calls exceeded");
     }
-    let { lastRetrievedApiTotal, contactsCount, insertionErrors, nextOffset } =
-      await _dbRepo.getContactsImportStatus();
+    let {
+      lastRetrievedApiTotal,
+      contactsCount,
+      insertionErrors,
+      nextOffset,
+      // eslint-disable-next-line prefer-const
+      orgId,
+    } = await _dbRepo.getContactsImportStatus();
+
+    const currentOrgId = _contactsApi.orgId;
 
     console.log(`>>> resumeOrStartPopulatingDb (${numOfCalls}): `, {
       lastRetrievedApiTotal,
@@ -29,20 +37,23 @@ export async function resumeOrStartPopulatingDb(
       contactsCount,
       insertionErrors,
       nextOffset,
+      orgId,
     });
 
-    if (lastRetrievedApiTotal !== apiTotal) {
+    if (lastRetrievedApiTotal !== apiTotal || orgId !== currentOrgId) {
       // need to clear db
       await _dbRepo.clearDb();
       await _dbRepo.updateNextOffset(0);
       await _dbRepo.updateApiTotal(apiTotal);
+      await _dbRepo.updateOrgId(currentOrgId);
+
       lastRetrievedApiTotal = apiTotal;
       insertionErrors = 0;
       contactsCount = 0;
       nextOffset = 0;
       console.log(
-        `>>> resumeOrStartPopulatingDb (${numOfCalls}): clearing DB for API/DB stored total mismatch`,
-        { lastRetrievedApiTotal, apiTotal }
+        `>>> resumeOrStartPopulatingDb (${numOfCalls}): clearing DB for API/DB mismatch`,
+        { lastRetrievedApiTotal, apiTotal, orgId, currentOrgId }
       );
     }
 
