@@ -2,7 +2,7 @@ import { createExternalContactsApi } from "../api/externalContactsApi";
 import { createExternalContactsDbRepo } from "../repo/externalContactsDbRepo";
 
 const MAX_NUM_CALLS = 1000;
-const INGESTION_PAGE_SIZE = 10000;
+const INGESTION_PAGE_SIZE = 50000;
 
 export async function resumeOrStartPopulatingDb(
   { _dbRepo, _contactsApi, _pageSize } = {
