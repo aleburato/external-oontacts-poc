@@ -23,11 +23,11 @@ export const ContactList = memo(({ searchTerm, page }: ContactListProps) => {
     limit: QUERY_PAGE_SIZE,
   });
 
-  // console.log(">>> render contacts list", queryResult);
+  console.log(">>> render contacts list", queryResults, searchTerm);
 
   return (
     <div className="contactsListWrapper">
-      {queryResults && dbMeta ? (
+      {queryResults && dbMeta && searchTerm === queryResults.search ? (
         <ContactListHeader
           dbMeta={dbMeta}
           queryResults={queryResults}

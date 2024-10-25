@@ -9,11 +9,16 @@ export function useContactsDbQuery({
   search,
   start,
   limit,
-}: QueryContactsParams): QueryContactsResult | undefined {
-  const cleanSearch = search.trim().toLowerCase();
-
-  return useLiveQuery(() => {
-    const dbRepo = createExternalContactsDbRepo();
-    return dbRepo.queryContacts({ search: cleanSearch, start, limit });
-  }, [cleanSearch, start, limit]);
+}: QueryContactsParams):
+  | (QueryContactsResult & { search: string })
+  | undefined {
+  return useLiveQuery(
+    async () => {
+      const dbRepo = createExternalContactsDbRepo();
+      const result = await dbRepo.queryContacts({ search, start, limit });
+      return { ...result, search };
+    },
+    [search, start, limit],
+    undefined
+  );
 }
