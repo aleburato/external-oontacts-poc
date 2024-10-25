@@ -1,4 +1,7 @@
-import { faker } from "@faker-js/faker";
+import {
+  generateRandomCompanyName,
+  generateRandomPhoneNumberType,
+} from "../../common/randomDataHelpers";
 import {
   ExternalContactsApi,
   GetExternalContactsParams,
@@ -47,15 +50,12 @@ export class ExternalContactsApiImpl implements ExternalContactsApi {
         id: c.contactId,
         givenName: c.firstName,
         familyName: c.lastName,
-        displayName: c.displayName || "",
-        companyName: c.companyName || faker.company.name(),
-        // phoneNumbers: c.phoneNumbers || [],
-        phoneNumbers: faker.helpers.multiple(
-          () =>
-            `${faker.phone.number({ style: "national" })};${faker.helpers.arrayElement(["work", "mobile", "other"])}`,
-          { count: { min: 1, max: 3 } }
-        ),
-        // companyName: c.companyName,
+        displayName: `${c.firstName} ${c.lastName}`,
+        companyName: generateRandomCompanyName(),
+        phoneNumbers:
+          c.phoneNumbers?.map(
+            (pn) => `${pn.value};${generateRandomPhoneNumberType()}`
+          ) || [],
       })),
       total: data.total,
       limit: data.limit,
