@@ -3,6 +3,9 @@ import { useInitializeContactsDb } from "../hooks/useInitializeContactsDb";
 import { ContactList } from "./ContactList";
 import { ContactSearch } from "./ContactSearch";
 import { ContactsContext } from "./contexts/contactsContext";
+import { DbInfo } from "./DbInfo";
+
+import "./Contacts.css";
 
 export function Contacts() {
   useInitializeContactsDb();
@@ -15,11 +18,15 @@ export function Contacts() {
 
   return (
     <ContactsContext.Provider value={context}>
-      <ContactSearch
-        onSearchChange={setSearch}
-        onPageChange={setPage}
-        maxPage={maxPage}
-      />
+      <section className="contactsTopWrapper">
+        <ContactSearch
+          onSearchChange={setSearch}
+          onPageChange={setPage}
+          maxPage={maxPage}
+        />
+        <DbInfo />
+      </section>
+
       {search && <ContactList searchTerm={search} page={page} />}
     </ContactsContext.Provider>
   );

@@ -1,5 +1,4 @@
 import { memo } from "react";
-import { useContactsDbMetadata } from "../hooks/useContactsDbMetadata";
 import { useContactsDbQuery } from "../hooks/useContactsDbQuery";
 import { ContactListHeader } from "./ContactListHeader";
 
@@ -14,8 +13,6 @@ export interface ContactListProps {
 }
 
 export const ContactList = memo(({ searchTerm, page }: ContactListProps) => {
-  const dbMeta = useContactsDbMetadata();
-
   const startOffset = (page - 1) * QUERY_PAGE_SIZE;
   const queryResults = useContactsDbQuery({
     search: searchTerm,
@@ -27,9 +24,8 @@ export const ContactList = memo(({ searchTerm, page }: ContactListProps) => {
 
   return (
     <div className="contactsListWrapper">
-      {queryResults && dbMeta && searchTerm === queryResults.search ? (
+      {queryResults && searchTerm === queryResults.search ? (
         <ContactListHeader
-          dbMeta={dbMeta}
           queryResults={queryResults}
           searchTerm={searchTerm}
           page={page}
