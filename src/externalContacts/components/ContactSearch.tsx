@@ -40,8 +40,8 @@ export const ContactSearch = memo(
 
     return (
       <div className="contactSearchWrapper">
-        <label htmlFor="searchBox">Search </label>
         <input
+          placeholder="Type here to search for contacts..."
           id="searchbox"
           type="text"
           value={search}
