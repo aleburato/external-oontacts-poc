@@ -20,7 +20,7 @@ export function Contacts() {
         onPageChange={setPage}
         maxPage={maxPage}
       />
-      <ContactList searchTerm={search} page={page} />
+      {search && <ContactList searchTerm={search} page={page} />}
     </ContactsContext.Provider>
   );
 }
